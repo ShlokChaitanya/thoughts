@@ -1,0 +1,39 @@
+---
+title: "What I learned building Billoma"
+slug: "building-billoma"
+description: "Billing is a conversation with a ledger attached. Notes from making invoices, payments and messages share a lifecycle."
+publishedAt: "2026-09-08"
+status: "published"
+sequence: "02"
+readingTime: 6
+tags:
+  - Billoma
+  - Product
+related:
+  - scalable-saas-architecture
+  - realtime-ai-voice
+---
+
+Billoma looks like invoicing. It is actually a problem of continuity. Operators already know how to make a PDF. They do not know how to keep that PDF, the payment link, the reminder and the reply in one object as the week goes on.
+
+## The product is the lifecycle
+
+Draft, send, view, remind, pay, settle. Every feature that does not sit on that line is a distraction. I cut a lot of “nice for a billing suite” ideas because they would have created a second status that could disagree with the first.
+
+## Payments will lie to you
+
+Webhooks arrive twice. Clients refresh. Users click pay, panic, click again. If your charge identity is “the invoice id,” you will double-collect. If your charge identity is an idempotency key you control, you will sleep.
+
+## Messages belong on the invoice
+
+Email is not a system of record. When a customer asks “did you get this?” the answer has to be in the same thread as the money. That forced a design I liked: delivery is an event, not a side effect of a mail API.
+
+> If communication and payment diverge, the operator invents a spreadsheet. The spreadsheet always wins.
+
+## Quiet UI, loud machine
+
+The interface is monochrome and sparse on purpose. Operators do not need a celebration when an invoice is paid. They need to trust the row. The work went into the projector that makes that row true.
+
+- Never let the client confirm money.
+- Reminders read current state; they do not assume the past.
+- A human should be able to explain an invoice’s history from events alone.

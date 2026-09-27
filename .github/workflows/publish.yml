@@ -1,0 +1,72 @@
+name: Publish Notes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "notes/**"
+      - "schemas/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build and Sync Notes Metadata
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Typecheck
+        run: npm run typecheck
+
+      - name: Run Notes Validation
+        run: npm run validate
+
+      - name: Generate Notes Manifest
+        run: npm run build:index
+
+      - name: Sync Metadata to Notes API
+        env:
+          NOTES_API_URL: ${{ secrets.NOTES_API_URL }}
+          NOTES_SYNC_TOKEN: ${{ secrets.NOTES_SYNC_TOKEN }}
+        run: |
+          if [ -z "$NOTES_API_URL" ] || [ -z "$NOTES_SYNC_TOKEN" ]; then
+            echo "::warning ::NOTES_API_URL or NOTES_SYNC_TOKEN secrets are not configured. Skipping API sync."
+            exit 0
+          fi
+
+          echo "Syncing metadata manifest to Notes API at $NOTES_API_URL..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$NOTES_API_URL/sync" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $NOTES_SYNC_TOKEN" \
+            -d @generated/notes.json)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response status: $HTTP_CODE"
+          echo "Response body: $BODY"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error ::Failed to sync notes metadata. HTTP status: $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Notes metadata synchronized successfully."

@@ -1,0 +1,57 @@
+---
+title: "Building a scalable SaaS architecture"
+slug: "scalable-saas-architecture"
+description: "How I think about SaaS as a lifecycle of events, not a collection of screens — with Postgres, Redis, and a refusal to let the UI become the source of truth."
+publishedAt: "2026-09-01"
+status: "published"
+sequence: "01"
+readingTime: 8
+tags:
+  - SaaS
+  - Architecture
+related:
+  - building-billoma
+  - realtime-ai-voice
+---
+
+A SaaS product fails in the seams. The dashboard looks finished. The object it represents — an invoice, a workspace, a job — is still a row that can be updated from three places at once. Scale is not the first problem. Truth is.
+
+## Start from the object
+
+I do not start from the landing page. I start from the object that must remain consistent when two users, a webhook and a cron job arrive together. For BILLoma that object is the invoice lifecycle. For SENSERA it is the encounter. If you cannot name the object, you are building a website with a login.
+
+## Events, then projections
+
+Writes append. Reads project. This is not a religion about event sourcing. It is a way to keep webhooks, reminders and user edits on one path. When Stripe repeats an event, you do not “update the invoice again.” You insert an event with a unique id or you no-op.
+
+```ts
+async function applyPayment(eventId: string, invoiceId: string) {
+  const inserted = await db.events.insert({
+    id: eventId,
+    type: "payment.succeeded",
+    invoiceId,
+  }).onConflict("id").ignore()
+
+  if (!inserted) return
+  await projectInvoice(invoiceId)
+}
+```
+
+## Postgres for money, Redis for motion
+
+PostgreSQL holds the ledger. Redis holds locks, rate limits and jobs. If Redis disappears, the product should be slower, not fictional. I have watched teams cache invoice status because the query felt expensive. That is how you get paid twice and once.
+
+> If the cache is the only place a number is correct, the number is not correct.
+
+## Horizontal scale is a later sentence
+
+Most SaaS products I see do not need a mesh. They need indexes, idempotency keys, a queue that can be replayed, and a UI that cannot invent state. When you do need to split work, split along the object: shard by workspace, not by random table.
+
+- One writer path per object, even if many readers.
+- Jobs must be retryable without multiplying side effects.
+- The UI may be optimistic. The server may not be.
+- Observability starts as event logs you can grep, not as a vendor.
+
+## What I actually ship
+
+Next.js as the application surface. Typed API boundaries. A relational schema that looks like the business. A small set of queues. That stack is not fashionable. It is the one I can still explain at 2am, which is the only scalability that matters at the beginning.

@@ -1,0 +1,22 @@
+{
+  "name": "thoughts-content",
+  "version": "1.0.0",
+  "description": "Canonical MDX content repository for portfolio notes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "tsx scripts/validate-notes.ts",
+    "build:index": "tsx scripts/build-index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "reading-time": "^1.5.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

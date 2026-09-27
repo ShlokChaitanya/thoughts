@@ -1,0 +1,38 @@
+---
+title: "Example Engineering Note"
+slug: "example-note"
+description: "A reference draft note illustrating canonical frontmatter structure, code snippets, and Markdown elements."
+publishedAt: "2026-09-27"
+updatedAt: "2026-09-27"
+status: "draft"
+sequence: "04"
+tags:
+  - Engineering
+  - Template
+related:
+  - scalable-saas-architecture
+---
+
+This is an example note demonstrating the canonical MDX format for technical writing in the portfolio.
+
+## Writing Technical Notes
+
+Notes should focus on engineering lessons, architectural decisions, and production invariants rather than generic summaries.
+
+### Code and Formatting
+
+Fenced code blocks are supported natively with syntax highlighting:
+
+```typescript
+export interface ServiceConfig {
+  retries: number;
+  timeoutMs: number;
+  backoffFactor: number;
+}
+```
+
+### Key Principles
+
+- Keep the source of truth immutable.
+- Prefer explicit state transitions over ambient context.
+- Use idempotency keys on write endpoints.

@@ -1,0 +1,66 @@
+---
+title: "Designing realtime AI voice systems"
+slug: "realtime-ai-voice"
+description: "Turn-taking, barge-in and latency budgets. Why a voice agent is a media graph with a model in the slowest hop."
+publishedAt: "2026-08-18"
+status: "published"
+sequence: "03"
+readingTime: 10
+tags:
+  - AI
+  - Realtime
+related:
+  - scalable-saas-architecture
+  - building-billoma
+---
+
+A voice agent is not a chat UI with a microphone. It is a media graph. Audio in, partial text, a decision that the human stopped talking, a model, audio out — and a way to interrupt all of that when the human did not stop talking.
+
+## The budget is the product
+
+If the first audible token takes 1.8 seconds, users describe the agent as “slow,” not as “a transformer with a queue.” I write latency as a budget with named hops. Anything without a number is a wish.
+
+```text
+Latency budget sketch:
+
+  capture     20–40ms
+  stt partial 80–200ms
+  turn end    150–400ms   ← policy, not model
+  llm first   200–800ms
+  tts first   80–250ms
+  playout     20–60ms
+```
+
+## Turn detection is a policy
+
+Models do not know when a sentence is done in a noisy room. Silence thresholds, punctuation from partial STT, and barge-in energy from the mic are a control system. Too aggressive and you cut the human. Too polite and the call feels like a voicemail.
+
+## Stream everything
+
+Batch STT → batch LLM → batch TTS is a demo. The usable version streams partials, starts TTS on the first sentence boundary, and cancels the graph on barge-in without leaving a zombie speaker.
+
+```ts
+type Hop =
+  | { t: "partial"; text: string }
+  | { t: "turn_end" }
+  | { t: "token"; text: string }
+  | { t: "audio"; pcm: Buffer }
+  | { t: "barge_in" }
+
+function reduce(state: Graph, hop: Hop): Graph {
+  if (hop.t === "barge_in") return cancelOutbound(state)
+  return append(state, hop)
+}
+```
+
+## What I stole from video
+
+Meet Forever taught reconnection and ICE. Voice AI taught that the same discipline applies above the media layer. If you cannot draw the graph, you cannot debug the awkward pause.
+
+> The model is a slow, expensive hop. Design the system so the conversation does not have to wait for it to be complete.
+
+## Still open
+
+- Evaluating turn-taking without a human in the loop is still weak.
+- Local models change the budget; they do not remove the graph.
+- Tool calls in the middle of speech are a second interruption problem.
