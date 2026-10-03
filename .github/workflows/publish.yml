@@ -47,6 +47,7 @@ jobs:
         env:
           NOTES_API_URL: ${{ secrets.NOTES_API_URL }}
           NOTES_SYNC_TOKEN: ${{ secrets.NOTES_SYNC_TOKEN }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           set -e
       
@@ -71,6 +72,7 @@ jobs:
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$NOTES_API_URL/api/v1/notes/sync" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $NOTES_SYNC_TOKEN" \
+            -H "x-vercel-automation-bypass-secret: $VERCEL_AUTOMATION_BYPASS_SECRET" \
             -d @generated/notes.json)
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
