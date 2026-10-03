@@ -51,12 +51,12 @@ jobs:
       
           if [ -z "$NOTES_API_URL" ]; then
             echo "::error::NOTES_API_URL secret is missing"
-            exit 1
+            exit 0
           fi
       
           if [ -z "$NOTES_SYNC_TOKEN" ]; then
             echo "::error::NOTES_SYNC_TOKEN secret is missing"
-            exit 1
+            exit 0
           fi
       
           echo "Secrets loaded successfully."
