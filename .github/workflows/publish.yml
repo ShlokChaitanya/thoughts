@@ -68,7 +68,7 @@ jobs:
           fi
 
           echo "Syncing metadata manifest to Notes API at $NOTES_API_URL..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$NOTES_API_URL/sync" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$NOTES_API_URL/api/v1/notes/sync" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $NOTES_SYNC_TOKEN" \
             -d @generated/notes.json)
