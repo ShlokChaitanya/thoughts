@@ -83,4 +83,4 @@ jobs:
             exit 1
           fi
 
-          echo "Notes metadata synchronized successfully."
+          echo "Notes metadata synchronized successfully"
