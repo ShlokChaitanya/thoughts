@@ -47,6 +47,20 @@ jobs:
           NOTES_API_URL: ${{ secrets.NOTES_API_URL }}
           NOTES_SYNC_TOKEN: ${{ secrets.NOTES_SYNC_TOKEN }}
         run: |
+          set -e
+      
+          if [ -z "$NOTES_API_URL" ]; then
+            echo "::error::NOTES_API_URL secret is missing"
+            exit 1
+          fi
+      
+          if [ -z "$NOTES_SYNC_TOKEN" ]; then
+            echo "::error::NOTES_SYNC_TOKEN secret is missing"
+            exit 1
+          fi
+      
+          echo "Secrets loaded successfully."
+          
           if [ -z "$NOTES_API_URL" ] || [ -z "$NOTES_SYNC_TOKEN" ]; then
             echo "::warning ::NOTES_API_URL or NOTES_SYNC_TOKEN secrets are not configured. Skipping API sync."
             exit 0
