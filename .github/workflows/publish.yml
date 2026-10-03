@@ -19,6 +19,7 @@ jobs:
   publish:
     name: Build and Sync Notes Metadata
     runs-on: ubuntu-latest
+    environment: API
 
     steps:
       - name: Checkout repository
