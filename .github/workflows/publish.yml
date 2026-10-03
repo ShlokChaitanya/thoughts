@@ -60,7 +60,7 @@ jobs:
           fi
       
           echo "Secrets loaded successfully."
-          
+
           if [ -z "$NOTES_API_URL" ] || [ -z "$NOTES_SYNC_TOKEN" ]; then
             echo "::warning ::NOTES_API_URL or NOTES_SYNC_TOKEN secrets are not configured. Skipping API sync."
             exit 0
@@ -83,4 +83,4 @@ jobs:
             exit 1
           fi
 
-          echo "Notes metadata synchronized successfully"
+          echo "Notes metadata synchronized successfully."
