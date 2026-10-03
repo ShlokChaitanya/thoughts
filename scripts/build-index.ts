@@ -4,6 +4,9 @@ import matter from "gray-matter";
 import getReadingTime from "reading-time";
 import { NoteFrontmatterSchema, NoteMetadata } from "../schemas/note.js";
 
+const GITHUB_RAW_BASE =
+  "https://raw.githubusercontent.com/ShlokChaitanya/thoughts/refs/heads/main";
+
 const NOTES_DIR = path.resolve(process.cwd(), "notes");
 const OUTPUT_DIR = path.resolve(process.cwd(), "generated");
 const OUTPUT_FILE = path.join(OUTPUT_DIR, "notes.json");
@@ -95,7 +98,7 @@ function main() {
       tags: fm.tags,
       related: fm.related,
       status: fm.status,
-      path: item.relativePath,
+      path: `${GITHUB_RAW_BASE}/${item.relativePath.replace(/\\/g, "/")}`,
     };
   });
 
